@@ -191,7 +191,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             MaterialPageRoute<void>(
                               builder: (context) => LicaoScreen(
                                 materia: m.nome,
-                                usuarioId: usuario.id,
+                                usuarioId: widget.usuarioId,
                                 vidasInicial: usuario.vidas,
                                 apiService: _api,
                               ),
