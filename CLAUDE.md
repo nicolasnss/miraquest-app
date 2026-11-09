@@ -3,7 +3,7 @@
 App gamificado de questões para concursos de TI (lacuna/cloze, múltipla escolha, certo/errado) com XP, vidas e sequência de dias. API: `D:\Desenvolvimento\Projetos\miraquest.api` (Spring Boot).
 
 ## Estrutura (`lib/`)
-- `main.dart` — tema Material 3 (cores fixas `_primary`/`_accent`, fonte Outfit via google_fonts).
+- `main.dart` — tema Material 3 com a paleta "Pôr do sol" (`lib/theme/mira_cores.dart`, igual ao tipo de nota `MIRAQuest-Cloze` do Anki; fonte Roboto via google_fonts).
 - `models/` — `QuestaoModel`, `MateriaModel`, `UsuarioModel`, `VerificarRespostaModel` (todos com `fromJson` tolerante).
 - `services/api_service.dart` — único ponto de acesso HTTP (`http`); base URL hoje constante `http://10.0.2.2:8080` (emulador Android).
 - `services/session_store.dart` — `Sessao` + `SessionStore` (`SecureSessionStore` usa flutter_secure_storage; fakes nos testes).
@@ -24,4 +24,4 @@ App gamificado de questões para concursos de TI (lacuna/cloze, múltipla escolh
 - `flutter analyze` · `flutter test` · `flutter run`
 
 ## Backlog
-URL da API por configuração (`--dart-define`), paleta "Pôr do sol".
+Nenhum item pendente.

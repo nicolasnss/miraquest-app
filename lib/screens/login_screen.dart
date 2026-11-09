@@ -62,7 +62,6 @@ class _LoginScreenState extends State<LoginScreen> {
     final primary = theme.colorScheme.primary;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -77,7 +76,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     Text(
                       'MIRAQuest',
                       textAlign: TextAlign.center,
-                      style: GoogleFonts.outfit(
+                      style: GoogleFonts.roboto(
                         fontSize: 34,
                         fontWeight: FontWeight.w700,
                         color: primary,
@@ -87,7 +86,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     Text(
                       _criarConta ? 'Crie sua conta' : 'Entre para continuar',
                       textAlign: TextAlign.center,
-                      style: GoogleFonts.outfit(fontSize: 16),
+                      style: GoogleFonts.roboto(fontSize: 16),
                     ),
                     const SizedBox(height: 32),
                     TextFormField(

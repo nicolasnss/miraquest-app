@@ -5,6 +5,7 @@ import 'screens/home_screen.dart';
 import 'screens/login_screen.dart';
 import 'services/api_service.dart';
 import 'services/session_store.dart';
+import 'theme/mira_cores.dart';
 
 void main() {
   runApp(const MiraQuestApp());
@@ -15,40 +16,50 @@ class MiraQuestApp extends StatelessWidget {
 
   final SessionStore? store;
 
-  static const Color _primary = Color(0xFF1A237E);
-  static const Color _accent = Color(0xFF00E676);
-
   @override
   Widget build(BuildContext context) {
     final colorScheme = ColorScheme.light(
-      primary: _primary,
-      secondary: _accent,
-      surface: Colors.white,
+      primary: MiraCores.texto,
+      onPrimary: Colors.white,
+      secondary: MiraCores.destaque,
+      onSecondary: Colors.white,
+      surface: MiraCores.superficie,
+      onSurface: MiraCores.texto,
+      onSurfaceVariant: MiraCores.texto.withValues(alpha: 0.7),
+      error: MiraCores.erro,
     );
 
     return MaterialApp(
       title: 'MIRAQuest',
       debugShowCheckedModeBanner: false,
+      // Degradê "Pôr do sol" atrás de todas as telas (Scaffold transparente).
+      builder: (context, child) => DecoratedBox(
+        decoration: const BoxDecoration(gradient: MiraCores.fundo),
+        child: child,
+      ),
       theme: ThemeData(
         useMaterial3: true,
-        primaryColor: _primary,
-        colorScheme: colorScheme.copyWith(
-          primary: _primary,
-          secondary: _accent,
-        ),
+        primaryColor: MiraCores.texto,
+        colorScheme: colorScheme,
+        scaffoldBackgroundColor: Colors.transparent,
         appBarTheme: AppBarTheme(
-          backgroundColor: _primary,
-          foregroundColor: Colors.white,
-          titleTextStyle: GoogleFonts.outfit(
-            color: Colors.white,
+          backgroundColor: Colors.transparent,
+          foregroundColor: MiraCores.texto,
+          elevation: 0,
+          scrolledUnderElevation: 0,
+          titleTextStyle: GoogleFonts.roboto(
+            color: MiraCores.texto,
             fontSize: 20,
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w700,
           ),
         ),
-        textTheme: GoogleFonts.outfitTextTheme(),
+        textTheme: GoogleFonts.robotoTextTheme().apply(
+          bodyColor: MiraCores.texto,
+          displayColor: MiraCores.texto,
+        ),
         floatingActionButtonTheme: const FloatingActionButtonThemeData(
-          backgroundColor: _accent,
-          foregroundColor: Color(0xFF1A237E),
+          backgroundColor: MiraCores.destaque,
+          foregroundColor: Colors.white,
         ),
       ),
       home: AuthGate(store: store ?? SecureSessionStore()),

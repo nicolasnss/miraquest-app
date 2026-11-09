@@ -6,6 +6,7 @@ import '../models/materia_model.dart';
 import '../models/usuario_model.dart';
 import '../services/api_service.dart';
 import 'licao_screen.dart';
+import '../theme/mira_cores.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({
@@ -46,7 +47,6 @@ class _HomeScreenState extends State<HomeScreen> {
     final accent = theme.colorScheme.secondary;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
       body: SafeArea(
         child: Column(
           children: [
@@ -97,7 +97,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   Text(
                     'Não foi possível carregar seu progresso.',
                     textAlign: TextAlign.center,
-                    style: GoogleFonts.outfit(
+                    style: GoogleFonts.roboto(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
                     ),
@@ -140,7 +140,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 padding: const EdgeInsets.fromLTRB(20, 16, 20, 4),
                 child: Text(
                   'ESCOLHA UMA MATÉRIA',
-                  style: GoogleFonts.outfit(
+                  style: GoogleFonts.roboto(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 1,
@@ -263,7 +263,7 @@ class _HeaderStats extends StatelessWidget {
           Expanded(
             child: _StatChip(
               icon: Icons.favorite_rounded,
-              iconColor: const Color(0xFFFF5252),
+              iconColor: MiraCores.erro,
               label: '$vidas',
               subtitle: 'Vidas',
             ),
@@ -271,7 +271,7 @@ class _HeaderStats extends StatelessWidget {
           Expanded(
             child: _StatChip(
               icon: Icons.local_fire_department_rounded,
-              iconColor: const Color(0xFFFFAB40),
+              iconColor: MiraCores.solTopo,
               label: '$streakDias',
               subtitle: 'Streak',
             ),
@@ -285,7 +285,7 @@ class _HeaderStats extends StatelessWidget {
               children: [
                 Text(
                   'XP',
-                  style: GoogleFonts.outfit(
+                  style: GoogleFonts.roboto(
                     fontSize: 11,
                     color: Colors.white.withValues(alpha: 0.85),
                     fontWeight: FontWeight.w500,
@@ -293,7 +293,7 @@ class _HeaderStats extends StatelessWidget {
                 ),
                 Text(
                   '$xpTotal',
-                  style: GoogleFonts.outfit(
+                  style: GoogleFonts.roboto(
                     fontSize: 15,
                     color: Colors.white,
                     fontWeight: FontWeight.w700,
@@ -301,7 +301,7 @@ class _HeaderStats extends StatelessWidget {
                 ),
               ],
             ),
-            progressColor: accent,
+            progressColor: MiraCores.solTopo,
             backgroundColor: Colors.white.withValues(alpha: 0.2),
             circularStrokeCap: CircularStrokeCap.round,
             animation: true,
@@ -345,7 +345,7 @@ class _StatChip extends StatelessWidget {
           children: [
             Text(
               label,
-              style: GoogleFonts.outfit(
+              style: GoogleFonts.roboto(
                 fontSize: 22,
                 fontWeight: FontWeight.w700,
                 color: Colors.white,
@@ -353,7 +353,7 @@ class _StatChip extends StatelessWidget {
             ),
             Text(
               subtitle,
-              style: GoogleFonts.outfit(
+              style: GoogleFonts.roboto(
                 fontSize: 12,
                 color: Colors.white.withValues(alpha: 0.8),
               ),
@@ -381,7 +381,7 @@ class _MateriaCard extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Material(
-      color: Colors.white,
+      color: MiraCores.superficie,
       borderRadius: BorderRadius.circular(20),
       elevation: 2,
       shadowColor: theme.colorScheme.primary.withValues(alpha: 0.2),
@@ -411,7 +411,7 @@ class _MateriaCard extends StatelessWidget {
                   children: [
                     Text(
                       titulo,
-                      style: GoogleFonts.outfit(
+                      style: GoogleFonts.roboto(
                         fontSize: 18,
                         fontWeight: FontWeight.w700,
                         color: theme.colorScheme.primary,
@@ -421,7 +421,7 @@ class _MateriaCard extends StatelessWidget {
                     const SizedBox(height: 6),
                     Text(
                       subtitulo,
-                      style: GoogleFonts.outfit(
+                      style: GoogleFonts.roboto(
                         fontSize: 14,
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
@@ -464,7 +464,7 @@ class _AvisoMaterias extends StatelessWidget {
           Text(
             texto,
             textAlign: TextAlign.center,
-            style: GoogleFonts.outfit(fontSize: 16),
+            style: GoogleFonts.roboto(fontSize: 16),
           ),
         ],
       ),

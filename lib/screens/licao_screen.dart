@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../models/questao_model.dart';
 import '../services/api_service.dart';
+import '../theme/mira_cores.dart';
 
 const int _kQuestoesPorLicao = 5;
 
@@ -121,7 +122,6 @@ class _LicaoScreenState extends State<LicaoScreen> {
   }
 
   Future<void> _mostrarFeedbackAcerto(String? pegadinha) {
-    final accent = Theme.of(context).colorScheme.secondary;
     final primary = Theme.of(context).colorScheme.primary;
 
     return showModalBottomSheet<void>(
@@ -133,18 +133,22 @@ class _LicaoScreenState extends State<LicaoScreen> {
         return Padding(
           padding: const EdgeInsets.all(16),
           child: Material(
-            color: const Color(0xFFE8F5E9),
+            color: MiraCores.acertoFundo,
             borderRadius: BorderRadius.circular(20),
             child: Padding(
               padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.check_circle, color: accent, size: 56),
+                  const Icon(
+                    Icons.check_circle,
+                    color: MiraCores.acerto,
+                    size: 56,
+                  ),
                   const SizedBox(height: 12),
                   Text(
                     'Muito bem!',
-                    style: GoogleFonts.outfit(
+                    style: GoogleFonts.roboto(
                       fontSize: 22,
                       fontWeight: FontWeight.w700,
                       color: primary,
@@ -160,8 +164,8 @@ class _LicaoScreenState extends State<LicaoScreen> {
                     child: FilledButton(
                       onPressed: () => Navigator.of(ctx).pop(),
                       style: FilledButton.styleFrom(
-                        backgroundColor: accent,
-                        foregroundColor: primary,
+                        backgroundColor: MiraCores.acerto,
+                        foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -169,7 +173,7 @@ class _LicaoScreenState extends State<LicaoScreen> {
                       ),
                       child: Text(
                         'CONTINUAR',
-                        style: GoogleFonts.outfit(
+                        style: GoogleFonts.roboto(
                           fontWeight: FontWeight.w800,
                           letterSpacing: 1.2,
                         ),
@@ -197,7 +201,7 @@ class _LicaoScreenState extends State<LicaoScreen> {
         return Padding(
           padding: const EdgeInsets.all(16),
           child: Material(
-            color: const Color(0xFFFFEBEE),
+            color: MiraCores.erroFundo,
             borderRadius: BorderRadius.circular(20),
             child: Padding(
               padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
@@ -209,14 +213,14 @@ class _LicaoScreenState extends State<LicaoScreen> {
                     children: [
                       Icon(
                         Icons.cancel_rounded,
-                        color: Colors.red.shade700,
+                        color: MiraCores.erro,
                         size: 40,
                       ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
                           'Resposta incorreta',
-                          style: GoogleFonts.outfit(
+                          style: GoogleFonts.roboto(
                             fontSize: 20,
                             fontWeight: FontWeight.w700,
                             color: primary,
@@ -229,10 +233,10 @@ class _LicaoScreenState extends State<LicaoScreen> {
                     const SizedBox(height: 16),
                     Text(
                       explicacao,
-                      style: GoogleFonts.outfit(
+                      style: GoogleFonts.roboto(
                         fontSize: 15,
                         height: 1.45,
-                        color: Colors.grey.shade900,
+                        color: MiraCores.texto,
                       ),
                     ),
                   ],
@@ -246,7 +250,7 @@ class _LicaoScreenState extends State<LicaoScreen> {
                     child: FilledButton(
                       onPressed: () => Navigator.of(ctx).pop(),
                       style: FilledButton.styleFrom(
-                        backgroundColor: Colors.red.shade700,
+                        backgroundColor: MiraCores.erro,
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
@@ -255,7 +259,7 @@ class _LicaoScreenState extends State<LicaoScreen> {
                       ),
                       child: Text(
                         'CONTINUAR',
-                        style: GoogleFonts.outfit(
+                        style: GoogleFonts.roboto(
                           fontWeight: FontWeight.w800,
                           letterSpacing: 1.2,
                         ),
@@ -278,11 +282,10 @@ class _LicaoScreenState extends State<LicaoScreen> {
     final accent = theme.colorScheme.secondary;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppBar(
         title: Text(
           'Lição: ${widget.materia}',
-          style: GoogleFonts.outfit(fontWeight: FontWeight.w600),
+          style: GoogleFonts.roboto(fontWeight: FontWeight.w600),
         ),
       ),
       body: FutureBuilder<List<QuestaoModel>>(
@@ -298,7 +301,7 @@ class _LicaoScreenState extends State<LicaoScreen> {
                 child: Text(
                   'Não foi possível carregar a lição.\n${snapshot.error}',
                   textAlign: TextAlign.center,
-                  style: GoogleFonts.outfit(color: theme.colorScheme.error),
+                  style: GoogleFonts.roboto(color: theme.colorScheme.error),
                 ),
               ),
             );
@@ -309,7 +312,7 @@ class _LicaoScreenState extends State<LicaoScreen> {
             return Center(
               child: Text(
                 'Nenhuma questão disponível para esta matéria.',
-                style: GoogleFonts.outfit(
+                style: GoogleFonts.roboto(
                   fontSize: 16,
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
@@ -400,15 +403,11 @@ class _BarraProgressoELives extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(
-                Icons.favorite_rounded,
-                color: Colors.red.shade400,
-                size: 22,
-              ),
+              Icon(Icons.favorite_rounded, color: MiraCores.erro, size: 22),
               const SizedBox(width: 6),
               Text(
                 '$vidas',
-                style: GoogleFonts.outfit(
+                style: GoogleFonts.roboto(
                   fontSize: 18,
                   fontWeight: FontWeight.w800,
                   color: primary,
@@ -417,7 +416,7 @@ class _BarraProgressoELives extends StatelessWidget {
               const Spacer(),
               Text(
                 '${indice + 1}/$total',
-                style: GoogleFonts.outfit(
+                style: GoogleFonts.roboto(
                   fontWeight: FontWeight.w600,
                   color: primary.withValues(alpha: 0.85),
                 ),
@@ -452,21 +451,24 @@ class _NotaPegadinha extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.amber.shade100,
+        color: MiraCores.explicacao,
         borderRadius: BorderRadius.circular(12),
+        border: const Border(
+          left: BorderSide(color: MiraCores.destaque, width: 6),
+        ),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.warning_amber_rounded, color: Colors.amber.shade900),
+          const Icon(Icons.warning_amber_rounded, color: MiraCores.destaque),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
               'Pegadinha: $texto',
-              style: GoogleFonts.outfit(
+              style: GoogleFonts.roboto(
                 fontSize: 14,
                 height: 1.4,
-                color: Colors.grey.shade900,
+                color: MiraCores.texto,
               ),
             ),
           ),
@@ -516,14 +518,14 @@ class _PainelQuestao extends StatelessWidget {
             child: Chip(
               label: Text(
                 questao.banca!,
-                style: GoogleFonts.outfit(
+                style: GoogleFonts.roboto(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
-                  color: primary,
+                  color: MiraCores.destaque,
                 ),
               ),
               visualDensity: VisualDensity.compact,
-              backgroundColor: accent.withValues(alpha: 0.25),
+              backgroundColor: MiraCores.pergunta,
               side: BorderSide.none,
             ),
           ),
@@ -533,8 +535,9 @@ class _PainelQuestao extends StatelessWidget {
           width: double.infinity,
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: MiraCores.pergunta,
             borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: MiraCores.perguntaBorda),
             boxShadow: [
               BoxShadow(
                 color: primary.withValues(alpha: 0.08),
@@ -551,7 +554,7 @@ class _PainelQuestao extends StatelessWidget {
                 )
               : Text(
                   questao.enunciado,
-                  style: GoogleFonts.outfit(
+                  style: GoogleFonts.roboto(
                     fontSize: 17,
                     height: 1.5,
                     fontWeight: FontWeight.w500,
@@ -603,7 +606,7 @@ class _EnunciadoCloze extends StatelessWidget {
     if (!_lacunaRegex.hasMatch(enunciado)) {
       return Text(
         enunciado,
-        style: GoogleFonts.outfit(
+        style: GoogleFonts.roboto(
           fontSize: 17,
           height: 1.5,
           fontWeight: FontWeight.w500,
@@ -619,7 +622,7 @@ class _EnunciadoCloze extends StatelessWidget {
         spans.add(
           TextSpan(
             text: enunciado.substring(start, m.start),
-            style: GoogleFonts.outfit(
+            style: GoogleFonts.roboto(
               fontSize: 17,
               height: 1.5,
               fontWeight: FontWeight.w500,
@@ -642,7 +645,7 @@ class _EnunciadoCloze extends StatelessWidget {
             ),
             child: Text(
               '···',
-              style: GoogleFonts.outfit(
+              style: GoogleFonts.roboto(
                 fontWeight: FontWeight.w800,
                 color: primary,
                 letterSpacing: 2,
@@ -657,7 +660,7 @@ class _EnunciadoCloze extends StatelessWidget {
       spans.add(
         TextSpan(
           text: enunciado.substring(start),
-          style: GoogleFonts.outfit(
+          style: GoogleFonts.roboto(
             fontSize: 17,
             height: 1.5,
             fontWeight: FontWeight.w500,
@@ -692,17 +695,19 @@ class _BotoesCertoErrado extends StatelessWidget {
             ? FilledButton(
                 onPressed: bloqueado ? null : () => onTap(label),
                 style: FilledButton.styleFrom(
-                  backgroundColor: primary,
+                  backgroundColor: MiraCores.destaque,
                   foregroundColor: Colors.white,
-                  disabledBackgroundColor: primary.withValues(alpha: 0.4),
+                  disabledBackgroundColor: MiraCores.destaque.withValues(
+                    alpha: 0.4,
+                  ),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(6),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                   elevation: 0,
                 ),
                 child: Text(
                   label,
-                  style: GoogleFonts.outfit(
+                  style: GoogleFonts.roboto(
                     fontSize: 20,
                     fontWeight: FontWeight.w800,
                     letterSpacing: 0.5,
@@ -712,15 +717,19 @@ class _BotoesCertoErrado extends StatelessWidget {
             : OutlinedButton(
                 onPressed: bloqueado ? null : () => onTap(label),
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: primary,
-                  side: BorderSide(color: primary, width: 2.5),
+                  foregroundColor: MiraCores.texto,
+                  backgroundColor: MiraCores.botao,
+                  side: const BorderSide(
+                    color: MiraCores.botaoBorda,
+                    width: 2.5,
+                  ),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(6),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                 ),
                 child: Text(
                   label,
-                  style: GoogleFonts.outfit(
+                  style: GoogleFonts.roboto(
                     fontSize: 20,
                     fontWeight: FontWeight.w800,
                     letterSpacing: 0.5,
@@ -766,17 +775,17 @@ class _OpcoesCloze extends StatelessWidget {
         return OutlinedButton(
           onPressed: bloqueado ? null : () => onTap(op),
           style: OutlinedButton.styleFrom(
-            foregroundColor: primary,
-            side: BorderSide(color: primary.withValues(alpha: 0.5)),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            foregroundColor: MiraCores.texto,
+            side: const BorderSide(color: MiraCores.botaoBorda, width: 2),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(12),
             ),
-            backgroundColor: Colors.white,
+            backgroundColor: MiraCores.botao,
           ),
           child: Text(
             op,
-            style: GoogleFonts.outfit(
+            style: GoogleFonts.roboto(
               fontWeight: FontWeight.w600,
               fontSize: 14,
             ),
@@ -808,7 +817,7 @@ class _FallbackTipo extends StatelessWidget {
     if (opts.isEmpty) {
       return Text(
         'Questão sem opções configuradas.',
-        style: GoogleFonts.outfit(color: primary.withValues(alpha: 0.7)),
+        style: GoogleFonts.roboto(color: primary.withValues(alpha: 0.7)),
       );
     }
     return _OpcoesCloze(
@@ -847,7 +856,7 @@ class _MissaoCumpridaView extends StatelessWidget {
             Text(
               'Missão cumprida!',
               textAlign: TextAlign.center,
-              style: GoogleFonts.outfit(
+              style: GoogleFonts.roboto(
                 fontSize: 28,
                 fontWeight: FontWeight.w800,
                 color: primary,
@@ -872,7 +881,7 @@ class _MissaoCumpridaView extends StatelessWidget {
                 children: [
                   Text(
                     'XP ganho nesta lição',
-                    style: GoogleFonts.outfit(
+                    style: GoogleFonts.roboto(
                       fontSize: 14,
                       color: primary.withValues(alpha: 0.7),
                     ),
@@ -880,7 +889,7 @@ class _MissaoCumpridaView extends StatelessWidget {
                   const SizedBox(height: 6),
                   Text(
                     '+$xpTotal XP',
-                    style: GoogleFonts.outfit(
+                    style: GoogleFonts.roboto(
                       fontSize: 36,
                       fontWeight: FontWeight.w800,
                       color: accent,
@@ -904,7 +913,7 @@ class _MissaoCumpridaView extends StatelessWidget {
                 ),
                 child: Text(
                   'Voltar para a Home',
-                  style: GoogleFonts.outfit(
+                  style: GoogleFonts.roboto(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
                   ),
