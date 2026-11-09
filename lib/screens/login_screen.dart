@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../services/api_service.dart';
 import '../services/session_store.dart';
+import '../theme/mira_tema.dart';
 
 /// Tela de entrada: alterna entre login e criação de conta.
 class LoginScreen extends StatefulWidget {
@@ -59,120 +59,127 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final primary = theme.colorScheme.primary;
+    final textTheme = theme.textTheme;
 
     return Scaffold(
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 420),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Text(
-                      'MIRAQuest',
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.roboto(
-                        fontSize: 34,
-                        fontWeight: FontWeight.w700,
-                        color: primary,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      _criarConta ? 'Crie sua conta' : 'Entre para continuar',
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.roboto(fontSize: 16),
-                    ),
-                    const SizedBox(height: 32),
-                    TextFormField(
-                      controller: _email,
-                      keyboardType: TextInputType.emailAddress,
-                      autofillHints: const [AutofillHints.email],
-                      decoration: const InputDecoration(
-                        labelText: 'E-mail',
-                        border: OutlineInputBorder(),
-                      ),
-                      validator: (v) {
-                        final t = v?.trim() ?? '';
-                        return RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(t)
-                            ? null
-                            : 'Informe um e-mail válido';
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      controller: _senha,
-                      obscureText: _ocultarSenha,
-                      autofillHints: [
-                        _criarConta
-                            ? AutofillHints.newPassword
-                            : AutofillHints.password,
-                      ],
-                      onFieldSubmitted: (_) => _carregando ? null : _enviar(),
-                      decoration: InputDecoration(
-                        labelText: 'Senha',
-                        border: const OutlineInputBorder(),
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _ocultarSenha
-                                ? Icons.visibility
-                                : Icons.visibility_off,
-                          ),
-                          onPressed: () =>
-                              setState(() => _ocultarSenha = !_ocultarSenha),
+      body: Container(
+        decoration: MiraEstilo.fundoCeu,
+        child: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24),
+              child: Container(
+                constraints: const BoxConstraints(maxWidth: 420),
+                decoration: MiraEstilo.card,
+                padding: const EdgeInsets.all(24),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        'MIRAQuest',
+                        textAlign: TextAlign.center,
+                        style: textTheme.headlineMedium?.copyWith(
+                          fontWeight: FontWeight.w800,
                         ),
                       ),
-                      validator: (v) {
-                        final t = v ?? '';
-                        if (t.isEmpty) return 'Informe a senha';
-                        if (_criarConta && (t.length < 8 || t.length > 72)) {
-                          return 'A senha deve ter de 8 a 72 caracteres';
-                        }
-                        return null;
-                      },
-                    ),
-                    if (_erro != null) ...[
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 8),
                       Text(
-                        _erro!,
+                        _criarConta ? 'Crie sua conta' : 'Entre para continuar',
                         textAlign: TextAlign.center,
-                        style: TextStyle(color: theme.colorScheme.error),
+                        style: textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: 32),
+                      TextFormField(
+                        controller: _email,
+                        keyboardType: TextInputType.emailAddress,
+                        autofillHints: const [AutofillHints.email],
+                        decoration: const InputDecoration(
+                          labelText: 'E-mail',
+                          border: OutlineInputBorder(),
+                        ),
+                        validator: (v) {
+                          final t = v?.trim() ?? '';
+                          return RegExp(
+                                r'^[^@\s]+@[^@\s]+\.[^@\s]+$',
+                              ).hasMatch(t)
+                              ? null
+                              : 'Informe um e-mail válido';
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: _senha,
+                        obscureText: _ocultarSenha,
+                        autofillHints: [
+                          _criarConta
+                              ? AutofillHints.newPassword
+                              : AutofillHints.password,
+                        ],
+                        onFieldSubmitted: (_) => _carregando ? null : _enviar(),
+                        decoration: InputDecoration(
+                          labelText: 'Senha',
+                          border: const OutlineInputBorder(),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _ocultarSenha
+                                  ? Icons.visibility
+                                  : Icons.visibility_off,
+                            ),
+                            onPressed: () =>
+                                setState(() => _ocultarSenha = !_ocultarSenha),
+                          ),
+                        ),
+                        validator: (v) {
+                          final t = v ?? '';
+                          if (t.isEmpty) return 'Informe a senha';
+                          if (_criarConta && (t.length < 8 || t.length > 72)) {
+                            return 'A senha deve ter de 8 a 72 caracteres';
+                          }
+                          return null;
+                        },
+                      ),
+                      if (_erro != null) ...[
+                        const SizedBox(height: 16),
+                        Text(
+                          _erro!,
+                          textAlign: TextAlign.center,
+                          style: MiraEstilo.feedbackErro,
+                        ),
+                      ],
+                      const SizedBox(height: 24),
+                      FilledButton(
+                        onPressed: _carregando ? null : _enviar,
+                        style: FilledButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                        ),
+                        child: _carregando
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : Text(_criarConta ? 'Criar conta' : 'Entrar'),
+                      ),
+                      const SizedBox(height: 8),
+                      TextButton(
+                        onPressed: _carregando
+                            ? null
+                            : () => setState(() {
+                                _criarConta = !_criarConta;
+                                _erro = null;
+                              }),
+                        child: Text(
+                          _criarConta
+                              ? 'Já tenho conta'
+                              : 'Não tenho conta — criar agora',
+                        ),
                       ),
                     ],
-                    const SizedBox(height: 24),
-                    FilledButton(
-                      onPressed: _carregando ? null : _enviar,
-                      style: FilledButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                      ),
-                      child: _carregando
-                          ? const SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : Text(_criarConta ? 'Criar conta' : 'Entrar'),
-                    ),
-                    const SizedBox(height: 8),
-                    TextButton(
-                      onPressed: _carregando
-                          ? null
-                          : () => setState(() {
-                              _criarConta = !_criarConta;
-                              _erro = null;
-                            }),
-                      child: Text(
-                        _criarConta
-                            ? 'Já tenho conta'
-                            : 'Não tenho conta — criar agora',
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ),

@@ -12,6 +12,7 @@ import 'package:miraquest_app/models/materia_model.dart';
 import 'package:miraquest_app/models/usuario_model.dart';
 import 'package:miraquest_app/screens/home_screen.dart';
 import 'package:miraquest_app/services/api_service.dart';
+import 'package:miraquest_app/theme/mira_tema.dart';
 
 class _FakeApiService extends ApiService {
   _FakeApiService({this.materias = const []});
@@ -37,15 +38,7 @@ void main() {
   testWidgets('MIRAQuest carrega a home', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(
-          useMaterial3: true,
-          primaryColor: const Color(0xFF1A237E),
-          colorScheme: ColorScheme.light(
-            primary: const Color(0xFF1A237E),
-            secondary: const Color(0xFF00E676),
-            surface: Colors.white,
-          ),
-        ),
+        theme: MiraTema.claro,
         home: HomeScreen(apiService: _FakeApiService()),
       ),
     );

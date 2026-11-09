@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 
 import '../models/materia_model.dart';
 import '../models/usuario_model.dart';
 import '../services/api_service.dart';
+import '../theme/mira_tema.dart';
 import 'licao_screen.dart';
-import '../theme/mira_cores.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({
@@ -42,36 +41,34 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final primary = theme.colorScheme.primary;
-    final accent = theme.colorScheme.secondary;
-
     return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            if (widget.onLogout != null)
-              Align(
-                alignment: Alignment.centerRight,
-                child: IconButton(
-                  tooltip: 'Sair',
-                  icon: const Icon(Icons.logout),
-                  onPressed: widget.onLogout,
-                ),
-              ),
-            Expanded(child: _conteudo(context, theme, primary, accent)),
-          ],
+      body: DecoratedBox(
+        decoration: MiraEstilo.fundoCeu,
+        child: SizedBox.expand(
+          child: SafeArea(
+            child: Column(
+              children: [
+                if (widget.onLogout != null)
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: IconButton(
+                      tooltip: 'Sair',
+                      icon: const Icon(Icons.logout),
+                      onPressed: widget.onLogout,
+                    ),
+                  ),
+                Expanded(child: _conteudo(context)),
+              ],
+            ),
+          ),
         ),
       ),
     );
   }
 
-  Widget _conteudo(
-    BuildContext context,
-    ThemeData theme,
-    Color primary,
-    Color accent,
-  ) {
+  Widget _conteudo(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+
     return FutureBuilder<UsuarioModel>(
       future: _usuarioFuture,
       builder: (context, snapshot) {
@@ -92,13 +89,12 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.cloud_off, size: 48, color: primary),
+                  const Icon(Icons.cloud_off, size: 48, color: MiraCores.texto),
                   const SizedBox(height: 16),
                   Text(
                     'Não foi possível carregar seu progresso.',
                     textAlign: TextAlign.center,
-                    style: GoogleFonts.roboto(
-                      fontSize: 18,
+                    style: textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -106,9 +102,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   Text(
                     '${snapshot.error}',
                     textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: theme.colorScheme.onSurfaceVariant,
-                      fontSize: 13,
+                    style: textTheme.bodySmall?.copyWith(
+                      color: MiraCores.texto.withValues(alpha: 0.7),
                     ),
                   ),
                 ],
@@ -130,8 +125,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   streakDias: usuario.streakDias,
                   xpTotal: usuario.xpTotal,
                   xpPercent: xpPct,
-                  primary: primary,
-                  accent: accent,
                 ),
               ),
             ),
@@ -140,11 +133,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 padding: const EdgeInsets.fromLTRB(20, 16, 20, 4),
                 child: Text(
                   'ESCOLHA UMA MATÉRIA',
-                  style: GoogleFonts.roboto(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 1,
-                    color: primary.withValues(alpha: 0.7),
+                  style: textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 1.5,
                   ),
                 ),
               ),
@@ -167,21 +158,19 @@ class _HomeScreenState extends State<HomeScreen> {
                       (_) => widget.onLogout!(),
                     );
                   }
-                  return SliverToBoxAdapter(
+                  return const SliverToBoxAdapter(
                     child: _AvisoMaterias(
                       icone: Icons.cloud_off,
                       texto: 'Não foi possível carregar as matérias.',
-                      cor: primary,
                     ),
                   );
                 }
                 final materias = snap.data ?? const <MateriaModel>[];
                 if (materias.isEmpty) {
-                  return SliverToBoxAdapter(
+                  return const SliverToBoxAdapter(
                     child: _AvisoMaterias(
                       icone: Icons.inbox_outlined,
                       texto: 'Nenhuma matéria disponível ainda.',
-                      cor: primary,
                     ),
                   );
                 }
@@ -222,48 +211,33 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
+/// Vidas, sequência de dias e XP, num card sobre o degradê.
 class _HeaderStats extends StatelessWidget {
   const _HeaderStats({
     required this.vidas,
     required this.streakDias,
     required this.xpTotal,
     required this.xpPercent,
-    required this.primary,
-    required this.accent,
   });
 
   final int vidas;
   final int streakDias;
   final int xpTotal;
   final double xpPercent;
-  final Color primary;
-  final Color accent;
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [primary, primary.withValues(alpha: 0.92)],
-        ),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: primary.withValues(alpha: 0.35),
-            blurRadius: 16,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
+      decoration: MiraEstilo.card,
       child: Row(
         children: [
           Expanded(
             child: _StatChip(
               icon: Icons.favorite_rounded,
-              iconColor: MiraCores.erro,
+              iconColor: MiraCores.vidas,
               label: '$vidas',
               subtitle: 'Vidas',
             ),
@@ -271,7 +245,7 @@ class _HeaderStats extends StatelessWidget {
           Expanded(
             child: _StatChip(
               icon: Icons.local_fire_department_rounded,
-              iconColor: MiraCores.solTopo,
+              iconColor: MiraCores.sequencia,
               label: '$streakDias',
               subtitle: 'Streak',
             ),
@@ -285,24 +259,22 @@ class _HeaderStats extends StatelessWidget {
               children: [
                 Text(
                   'XP',
-                  style: GoogleFonts.roboto(
-                    fontSize: 11,
-                    color: Colors.white.withValues(alpha: 0.85),
-                    fontWeight: FontWeight.w500,
+                  style: textTheme.labelSmall?.copyWith(
+                    color: MiraCores.xp,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
                 Text(
                   '$xpTotal',
-                  style: GoogleFonts.roboto(
-                    fontSize: 15,
-                    color: Colors.white,
-                    fontWeight: FontWeight.w700,
+                  style: textTheme.titleMedium?.copyWith(
+                    color: MiraCores.xp,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
               ],
             ),
-            progressColor: MiraCores.solTopo,
-            backgroundColor: Colors.white.withValues(alpha: 0.2),
+            progressColor: MiraCores.xp,
+            backgroundColor: MiraCores.botaoBorda,
             circularStrokeCap: CircularStrokeCap.round,
             animation: true,
           ),
@@ -327,13 +299,15 @@ class _StatChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.15),
+            color: iconColor.withValues(alpha: 0.12),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Icon(icon, color: iconColor, size: 26),
@@ -345,17 +319,15 @@ class _StatChip extends StatelessWidget {
           children: [
             Text(
               label,
-              style: GoogleFonts.roboto(
-                fontSize: 22,
-                fontWeight: FontWeight.w700,
-                color: Colors.white,
+              style: textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w800,
+                color: iconColor,
               ),
             ),
             Text(
               subtitle,
-              style: GoogleFonts.roboto(
-                fontSize: 12,
-                color: Colors.white.withValues(alpha: 0.8),
+              style: textTheme.bodySmall?.copyWith(
+                color: MiraCores.texto.withValues(alpha: 0.7),
               ),
             ),
           ],
@@ -378,63 +350,60 @@ class _MateriaCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final textTheme = Theme.of(context).textTheme;
 
-    return Material(
-      color: MiraCores.superficie,
-      borderRadius: BorderRadius.circular(20),
-      elevation: 2,
-      shadowColor: theme.colorScheme.primary.withValues(alpha: 0.2),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(20),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.secondary.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(16),
+    return Container(
+      decoration: MiraEstilo.card,
+      child: Material(
+        type: MaterialType.transparency,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(20),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: MiraCores.destaque.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: const Icon(
+                    Icons.menu_book_rounded,
+                    size: 32,
+                    color: MiraCores.destaque,
+                  ),
                 ),
-                child: Icon(
-                  Icons.menu_book_rounded,
-                  size: 32,
-                  color: theme.colorScheme.secondary,
-                ),
-              ),
-              const SizedBox(width: 20),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      titulo,
-                      style: GoogleFonts.roboto(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        color: theme.colorScheme.primary,
-                        letterSpacing: 0.3,
+                const SizedBox(width: 20),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        titulo,
+                        style: textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.3,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      subtitulo,
-                      style: GoogleFonts.roboto(
-                        fontSize: 14,
-                        color: theme.colorScheme.onSurfaceVariant,
+                      const SizedBox(height: 6),
+                      Text(
+                        subtitulo,
+                        style: textTheme.bodyMedium?.copyWith(
+                          color: MiraCores.texto.withValues(alpha: 0.7),
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              Icon(
-                Icons.chevron_right_rounded,
-                color: theme.colorScheme.primary.withValues(alpha: 0.6),
-                size: 28,
-              ),
-            ],
+                Icon(
+                  Icons.chevron_right_rounded,
+                  color: MiraCores.texto.withValues(alpha: 0.6),
+                  size: 28,
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -443,15 +412,10 @@ class _MateriaCard extends StatelessWidget {
 }
 
 class _AvisoMaterias extends StatelessWidget {
-  const _AvisoMaterias({
-    required this.icone,
-    required this.texto,
-    required this.cor,
-  });
+  const _AvisoMaterias({required this.icone, required this.texto});
 
   final IconData icone;
   final String texto;
-  final Color cor;
 
   @override
   Widget build(BuildContext context) {
@@ -459,12 +423,12 @@ class _AvisoMaterias extends StatelessWidget {
       padding: const EdgeInsets.all(32),
       child: Column(
         children: [
-          Icon(icone, size: 40, color: cor),
+          Icon(icone, size: 40, color: MiraCores.texto),
           const SizedBox(height: 12),
           Text(
             texto,
             textAlign: TextAlign.center,
-            style: GoogleFonts.roboto(fontSize: 16),
+            style: Theme.of(context).textTheme.titleMedium,
           ),
         ],
       ),
