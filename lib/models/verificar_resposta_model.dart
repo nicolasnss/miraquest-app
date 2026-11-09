@@ -3,11 +3,15 @@ class VerificarRespostaModel {
     required this.sucesso,
     required this.explicacao,
     required this.xpGanho,
+    this.pegadinha,
   });
 
   final bool sucesso;
   final String explicacao;
   final int xpGanho;
+
+  /// Nota sobre a armadilha da questão; só chega após responder. Nula se não houver.
+  final String? pegadinha;
 
   factory VerificarRespostaModel.fromJson(Map<String, dynamic> json) {
     final sucesso = _asBool(
@@ -21,13 +25,15 @@ class VerificarRespostaModel {
           json['mensagem'],
     );
 
-    final xp =
-        json['xpGanho'] ?? json['xp_ganho'] ?? json['xp'] ?? 0;
+    final xp = json['xpGanho'] ?? json['xp_ganho'] ?? json['xp'] ?? 0;
+
+    final pegadinha = _asString(json['pegadinha']).trim();
 
     return VerificarRespostaModel(
       sucesso: sucesso,
       explicacao: explicacao,
       xpGanho: _asInt(xp),
+      pegadinha: pegadinha.isEmpty ? null : pegadinha,
     );
   }
 

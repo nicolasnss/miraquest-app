@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -12,18 +10,6 @@ const int _kQuestoesPorLicao = 5;
 /// Lacuna no texto: sequência de dois ou mais underscores.
 final RegExp _lacunaRegex = RegExp(r'_{2,}');
 
-/// Opções do CLOZE: distrações + resposta correta, embaralhadas de forma estável por [questao.id].
-List<String> _opcoesClozeParaUi(QuestaoModel questao) {
-  final base = List<String>.from(questao.opcoesDistracao);
-  final correta = questao.respostaCorreta?.trim();
-  if (correta != null && correta.isNotEmpty) {
-    base.add(correta);
-  }
-  final out = List<String>.from(base);
-  out.shuffle(Random(questao.id));
-  return out;
-}
-
 class LicaoScreen extends StatefulWidget {
   const LicaoScreen({
     super.key,
@@ -34,6 +20,7 @@ class LicaoScreen extends StatefulWidget {
   });
 
   final String materia;
+
   /// ID do usuário logado (alinhado ao backend Java).
   final int usuarioId;
   final int vidasInicial;
@@ -46,8 +33,9 @@ class LicaoScreen extends StatefulWidget {
 class _LicaoScreenState extends State<LicaoScreen> {
   late final ApiService _api = widget.apiService ?? ApiService();
   late final PageController _pageController = PageController();
-  late final Future<List<QuestaoModel>> _licaoFuture =
-      _api.getLicao(widget.materia);
+  late final Future<List<QuestaoModel>> _licaoFuture = _api.getLicao(
+    widget.materia,
+  );
 
   int _vidas = 0;
   int _indiceAtual = 0;
@@ -99,13 +87,13 @@ class _LicaoScreenState extends State<LicaoScreen> {
         if (resultado.xpGanho > 0) {
           setState(() => _xpSessao += resultado.xpGanho);
         }
-        await _mostrarFeedbackAcerto();
+        await _mostrarFeedbackAcerto(resultado.pegadinha);
       } else {
         HapticFeedback.heavyImpact();
         setState(() {
           _vidas = (_vidas - 1).clamp(0, 999);
         });
-        await _mostrarFeedbackErro(resultado.explicacao);
+        await _mostrarFeedbackErro(resultado.explicacao, resultado.pegadinha);
       }
 
       if (!mounted) return;
@@ -126,13 +114,13 @@ class _LicaoScreenState extends State<LicaoScreen> {
     } catch (e) {
       if (!mounted) return;
       setState(() => _enviando = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erro: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Erro: $e')));
     }
   }
 
-  Future<void> _mostrarFeedbackAcerto() {
+  Future<void> _mostrarFeedbackAcerto(String? pegadinha) {
     final accent = Theme.of(context).colorScheme.secondary;
     final primary = Theme.of(context).colorScheme.primary;
 
@@ -162,6 +150,10 @@ class _LicaoScreenState extends State<LicaoScreen> {
                       color: primary,
                     ),
                   ),
+                  if (pegadinha != null) ...[
+                    const SizedBox(height: 16),
+                    _NotaPegadinha(texto: pegadinha),
+                  ],
                   const SizedBox(height: 20),
                   SizedBox(
                     width: double.infinity,
@@ -193,7 +185,7 @@ class _LicaoScreenState extends State<LicaoScreen> {
     );
   }
 
-  Future<void> _mostrarFeedbackErro(String explicacao) {
+  Future<void> _mostrarFeedbackErro(String explicacao, String? pegadinha) {
     final primary = Theme.of(context).colorScheme.primary;
 
     return showModalBottomSheet<void>(
@@ -215,7 +207,11 @@ class _LicaoScreenState extends State<LicaoScreen> {
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.cancel_rounded, color: Colors.red.shade700, size: 40),
+                      Icon(
+                        Icons.cancel_rounded,
+                        color: Colors.red.shade700,
+                        size: 40,
+                      ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
@@ -239,6 +235,10 @@ class _LicaoScreenState extends State<LicaoScreen> {
                         color: Colors.grey.shade900,
                       ),
                     ),
+                  ],
+                  if (pegadinha != null) ...[
+                    const SizedBox(height: 16),
+                    _NotaPegadinha(texto: pegadinha),
                   ],
                   const SizedBox(height: 24),
                   SizedBox(
@@ -400,7 +400,11 @@ class _BarraProgressoELives extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.favorite_rounded, color: Colors.red.shade400, size: 22),
+              Icon(
+                Icons.favorite_rounded,
+                color: Colors.red.shade400,
+                size: 22,
+              ),
               const SizedBox(width: 6),
               Text(
                 '$vidas',
@@ -436,6 +440,42 @@ class _BarraProgressoELives extends StatelessWidget {
   }
 }
 
+/// Aviso de "pegadinha" exibido após responder (a API só a revela depois).
+class _NotaPegadinha extends StatelessWidget {
+  const _NotaPegadinha({required this.texto});
+
+  final String texto;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.amber.shade100,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(Icons.warning_amber_rounded, color: Colors.amber.shade900),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              'Pegadinha: $texto',
+              style: GoogleFonts.outfit(
+                fontSize: 14,
+                height: 1.4,
+                color: Colors.grey.shade900,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _PainelQuestao extends StatelessWidget {
   const _PainelQuestao({
     required this.questao,
@@ -457,20 +497,38 @@ class _PainelQuestao extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final opcoesCloze = isCloze ? _opcoesClozeParaUi(questao) : const <String>[];
+    final opcoesCloze = isCloze ? questao.opcoes : const <String>[];
 
     if (isCloze && opcoesCloze.isEmpty) {
       debugPrint(
         '[MIRAQuest Cloze] Lista de opções vazia — '
         'questaoId=${questao.id} tipo=${questao.tipo} '
-        'opcoesDistracao=${questao.opcoesDistracao} '
-        'respostaCorreta=${questao.respostaCorreta}',
+        'opcoes=${questao.opcoes}',
       );
     }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        if (questao.banca != null) ...[
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Chip(
+              label: Text(
+                questao.banca!,
+                style: GoogleFonts.outfit(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: primary,
+                ),
+              ),
+              visualDensity: VisualDensity.compact,
+              backgroundColor: accent.withValues(alpha: 0.25),
+              side: BorderSide.none,
+            ),
+          ),
+          const SizedBox(height: 8),
+        ],
         Container(
           width: double.infinity,
           padding: const EdgeInsets.all(20),
@@ -558,54 +616,58 @@ class _EnunciadoCloze extends StatelessWidget {
     var start = 0;
     for (final m in _lacunaRegex.allMatches(enunciado)) {
       if (m.start > start) {
-        spans.add(TextSpan(
-          text: enunciado.substring(start, m.start),
+        spans.add(
+          TextSpan(
+            text: enunciado.substring(start, m.start),
+            style: GoogleFonts.outfit(
+              fontSize: 17,
+              height: 1.5,
+              fontWeight: FontWeight.w500,
+              color: primary,
+            ),
+          ),
+        );
+      }
+      spans.add(
+        WidgetSpan(
+          alignment: PlaceholderAlignment.baseline,
+          baseline: TextBaseline.alphabetic,
+          child: Container(
+            margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              color: accent.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(color: accent, width: 1.5),
+            ),
+            child: Text(
+              '···',
+              style: GoogleFonts.outfit(
+                fontWeight: FontWeight.w800,
+                color: primary,
+                letterSpacing: 2,
+              ),
+            ),
+          ),
+        ),
+      );
+      start = m.end;
+    }
+    if (start < enunciado.length) {
+      spans.add(
+        TextSpan(
+          text: enunciado.substring(start),
           style: GoogleFonts.outfit(
             fontSize: 17,
             height: 1.5,
             fontWeight: FontWeight.w500,
             color: primary,
           ),
-        ));
-      }
-      spans.add(WidgetSpan(
-        alignment: PlaceholderAlignment.baseline,
-        baseline: TextBaseline.alphabetic,
-        child: Container(
-          margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-          decoration: BoxDecoration(
-            color: accent.withValues(alpha: 0.2),
-            borderRadius: BorderRadius.circular(6),
-            border: Border.all(color: accent, width: 1.5),
-          ),
-          child: Text(
-            '···',
-            style: GoogleFonts.outfit(
-              fontWeight: FontWeight.w800,
-              color: primary,
-              letterSpacing: 2,
-            ),
-          ),
         ),
-      ));
-      start = m.end;
-    }
-    if (start < enunciado.length) {
-      spans.add(TextSpan(
-        text: enunciado.substring(start),
-        style: GoogleFonts.outfit(
-          fontSize: 17,
-          height: 1.5,
-          fontWeight: FontWeight.w500,
-          color: primary,
-        ),
-      ));
+      );
     }
 
-    return RichText(
-      text: TextSpan(children: spans),
-    );
+    return RichText(text: TextSpan(children: spans));
   }
 }
 
@@ -622,10 +684,7 @@ class _BotoesCertoErrado extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget cebraspeButton({
-      required String label,
-      required bool filled,
-    }) {
+    Widget cebraspeButton({required String label, required bool filled}) {
       return SizedBox(
         width: double.infinity,
         height: 64,
@@ -745,7 +804,7 @@ class _FallbackTipo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final opts = List<String>.from(questao.opcoesDistracao);
+    final opts = questao.opcoes;
     if (opts.isEmpty) {
       return Text(
         'Questão sem opções configuradas.',

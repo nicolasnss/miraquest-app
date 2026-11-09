@@ -14,16 +14,20 @@ class QuestaoModel {
     required this.materia,
     required this.enunciado,
     required this.tipo,
-    required this.opcoesDistracao,
-    this.respostaCorreta,
+    required this.opcoes,
+    this.banca,
   });
 
   final int id;
   final String materia;
   final String enunciado;
   final TipoQuestao tipo;
-  final List<String> opcoesDistracao;
-  final String? respostaCorreta;
+
+  /// Opções já embaralhadas pela API (não indicam qual é a correta).
+  final List<String> opcoes;
+
+  /// Banca organizadora (ex.: CESPE); nula quando a questão não informa.
+  final String? banca;
 
   factory QuestaoModel.fromJson(Map<String, dynamic> json) {
     return QuestaoModel(
@@ -31,15 +35,8 @@ class QuestaoModel {
       materia: _asString(json['materia']),
       enunciado: _asString(json['enunciado']),
       tipo: _tipoFromJson(json['tipo'] ?? json['tipoQuestao']),
-      opcoesDistracao: _opcoesDistracaoFromJson(
-        json['opcoesDistracao'] ??
-            json['opcoes_distracao'] ??
-            json['opcoes'] ??
-            json['distracoes'],
-      ),
-      respostaCorreta: _optionalString(
-        json['respostaCorreta'] ?? json['resposta_correta'],
-      ),
+      opcoes: _opcoesFromJson(json['opcoes']),
+      banca: _asOptionalString(json['banca']),
     );
   }
 
@@ -93,12 +90,6 @@ class QuestaoModel {
     return TipoQuestao.desconhecido;
   }
 
-  static String? _optionalString(Object? value) {
-    if (value == null) return null;
-    final s = value.toString();
-    return s.isEmpty ? null : s;
-  }
-
   static int _asInt(Object? value) {
     if (value is int) return value;
     if (value is num) return value.toInt();
@@ -110,19 +101,16 @@ class QuestaoModel {
     return value.toString();
   }
 
-  /// Lista JSON ou String única com pipe: `'A|B|C'`.
-  static List<String> _opcoesDistracaoFromJson(Object? value) {
+  static String? _asOptionalString(Object? value) {
+    final s = value?.toString().trim() ?? '';
+    return s.isEmpty ? null : s;
+  }
+
+  static List<String> _opcoesFromJson(Object? value) {
     if (value == null) return [];
     if (value is List) {
       return value
           .map((e) => e?.toString().trim() ?? '')
-          .where((s) => s.isNotEmpty)
-          .toList();
-    }
-    if (value is String) {
-      return value
-          .split('|')
-          .map((s) => s.trim())
           .where((s) => s.isNotEmpty)
           .toList();
     }
