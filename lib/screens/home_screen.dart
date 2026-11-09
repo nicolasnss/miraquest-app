@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 
+import '../models/materia_model.dart';
 import '../models/usuario_model.dart';
 import '../services/api_service.dart';
 import 'licao_screen.dart';
@@ -11,10 +12,14 @@ class HomeScreen extends StatefulWidget {
     super.key,
     this.apiService,
     this.usuarioId = 1,
+    this.onLogout,
   });
 
   final ApiService? apiService;
   final int usuarioId;
+
+  /// Quando informado, exibe o botão de sair e é chamado se a sessão expirar.
+  final Future<void> Function()? onLogout;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -22,8 +27,10 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late final ApiService _api = widget.apiService ?? ApiService();
-  late final Future<UsuarioModel> _usuarioFuture =
-      _api.getUsuarioProgresso(widget.usuarioId);
+  late final Future<UsuarioModel> _usuarioFuture = _api.getUsuarioProgresso(
+    widget.usuarioId,
+  );
+  late final Future<List<MateriaModel>> _materiasFuture = _api.getMaterias();
 
   /// Progresso visual do XP em ciclo de 1000 pontos (ajustável quando houver nível na API).
   static double _xpPercent(int xpTotal) {
@@ -41,87 +48,176 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
       body: SafeArea(
-        child: FutureBuilder<UsuarioModel>(
-          future: _usuarioFuture,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            if (snapshot.hasError) {
-              return Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.cloud_off, size: 48, color: primary),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Não foi possível carregar seu progresso.',
-                        textAlign: TextAlign.center,
-                        style: GoogleFonts.outfit(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        '${snapshot.error}',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: theme.colorScheme.onSurfaceVariant,
-                          fontSize: 13,
-                        ),
-                      ),
-                    ],
-                  ),
+        child: Column(
+          children: [
+            if (widget.onLogout != null)
+              Align(
+                alignment: Alignment.centerRight,
+                child: IconButton(
+                  tooltip: 'Sair',
+                  icon: const Icon(Icons.logout),
+                  onPressed: widget.onLogout,
                 ),
-              );
-            }
-
-            final usuario = snapshot.data!;
-            final xpPct = _xpPercent(usuario.xpTotal);
-
-            return CustomScrollView(
-              slivers: [
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
-                    child: _HeaderStats(
-                      vidas: usuario.vidas,
-                      streakDias: usuario.streakDias,
-                      xpTotal: usuario.xpTotal,
-                      xpPercent: xpPct,
-                      primary: primary,
-                      accent: accent,
-                    ),
-                  ),
-                ),
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
-                    child: _MissaoDoDiaCard(
-                      titulo: 'MISSÃO DO DIA: REDES',
-                      onTap: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute<void>(
-                            builder: (context) => LicaoScreen(
-                              materia: 'REDES',
-                              usuarioId: usuario.id,
-                              vidasInicial: usuario.vidas,
-                              apiService: _api,
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ),
-              ],
-            );
-          },
+              ),
+            Expanded(child: _conteudo(context, theme, primary, accent)),
+          ],
         ),
       ),
+    );
+  }
+
+  Widget _conteudo(
+    BuildContext context,
+    ThemeData theme,
+    Color primary,
+    Color accent,
+  ) {
+    return FutureBuilder<UsuarioModel>(
+      future: _usuarioFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          if (snapshot.error is NaoAutorizadoException &&
+              widget.onLogout != null) {
+            // Sessão expirada: volta para o login.
+            WidgetsBinding.instance.addPostFrameCallback(
+              (_) => widget.onLogout!(),
+            );
+          }
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.cloud_off, size: 48, color: primary),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Não foi possível carregar seu progresso.',
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.outfit(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    '${snapshot.error}',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: theme.colorScheme.onSurfaceVariant,
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        final usuario = snapshot.data!;
+        final xpPct = _xpPercent(usuario.xpTotal);
+
+        return CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+                child: _HeaderStats(
+                  vidas: usuario.vidas,
+                  streakDias: usuario.streakDias,
+                  xpTotal: usuario.xpTotal,
+                  xpPercent: xpPct,
+                  primary: primary,
+                  accent: accent,
+                ),
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 4),
+                child: Text(
+                  'ESCOLHA UMA MATÉRIA',
+                  style: GoogleFonts.outfit(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 1,
+                    color: primary.withValues(alpha: 0.7),
+                  ),
+                ),
+              ),
+            ),
+            FutureBuilder<List<MateriaModel>>(
+              future: _materiasFuture,
+              builder: (context, snap) {
+                if (snap.connectionState != ConnectionState.done) {
+                  return const SliverToBoxAdapter(
+                    child: Padding(
+                      padding: EdgeInsets.all(32),
+                      child: Center(child: CircularProgressIndicator()),
+                    ),
+                  );
+                }
+                if (snap.hasError) {
+                  if (snap.error is NaoAutorizadoException &&
+                      widget.onLogout != null) {
+                    WidgetsBinding.instance.addPostFrameCallback(
+                      (_) => widget.onLogout!(),
+                    );
+                  }
+                  return SliverToBoxAdapter(
+                    child: _AvisoMaterias(
+                      icone: Icons.cloud_off,
+                      texto: 'Não foi possível carregar as matérias.',
+                      cor: primary,
+                    ),
+                  );
+                }
+                final materias = snap.data ?? const <MateriaModel>[];
+                if (materias.isEmpty) {
+                  return SliverToBoxAdapter(
+                    child: _AvisoMaterias(
+                      icone: Icons.inbox_outlined,
+                      texto: 'Nenhuma matéria disponível ainda.',
+                      cor: primary,
+                    ),
+                  );
+                }
+                return SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+                  sliver: SliverList.separated(
+                    itemCount: materias.length,
+                    separatorBuilder: (_, _) => const SizedBox(height: 12),
+                    itemBuilder: (context, i) {
+                      final m = materias[i];
+                      return _MateriaCard(
+                        titulo: m.nome.toUpperCase(),
+                        subtitulo: m.totalQuestoes == 1
+                            ? '1 questão'
+                            : '${m.totalQuestoes} questões',
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute<void>(
+                              builder: (context) => LicaoScreen(
+                                materia: m.nome,
+                                usuarioId: usuario.id,
+                                vidasInicial: usuario.vidas,
+                                apiService: _api,
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
+                );
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -151,10 +247,7 @@ class _HeaderStats extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            primary,
-            primary.withValues(alpha: 0.92),
-          ],
+          colors: [primary, primary.withValues(alpha: 0.92)],
         ),
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
@@ -272,13 +365,15 @@ class _StatChip extends StatelessWidget {
   }
 }
 
-class _MissaoDoDiaCard extends StatelessWidget {
-  const _MissaoDoDiaCard({
+class _MateriaCard extends StatelessWidget {
+  const _MateriaCard({
     required this.titulo,
+    required this.subtitulo,
     required this.onTap,
   });
 
   final String titulo;
+  final String subtitulo;
   final VoidCallback onTap;
 
   @override
@@ -304,7 +399,7 @@ class _MissaoDoDiaCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Icon(
-                  Icons.router_rounded,
+                  Icons.menu_book_rounded,
                   size: 32,
                   color: theme.colorScheme.secondary,
                 ),
@@ -325,7 +420,7 @@ class _MissaoDoDiaCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      'Toque para iniciar a lição',
+                      subtitulo,
                       style: GoogleFonts.outfit(
                         fontSize: 14,
                         color: theme.colorScheme.onSurfaceVariant,
@@ -342,6 +437,36 @@ class _MissaoDoDiaCard extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _AvisoMaterias extends StatelessWidget {
+  const _AvisoMaterias({
+    required this.icone,
+    required this.texto,
+    required this.cor,
+  });
+
+  final IconData icone;
+  final String texto;
+  final Color cor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(32),
+      child: Column(
+        children: [
+          Icon(icone, size: 40, color: cor),
+          const SizedBox(height: 12),
+          Text(
+            texto,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.outfit(fontSize: 16),
+          ),
+        ],
       ),
     );
   }

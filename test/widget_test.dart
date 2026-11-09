@@ -8,11 +8,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:miraquest_app/models/materia_model.dart';
 import 'package:miraquest_app/models/usuario_model.dart';
 import 'package:miraquest_app/screens/home_screen.dart';
 import 'package:miraquest_app/services/api_service.dart';
 
 class _FakeApiService extends ApiService {
+  _FakeApiService({this.materias = const []});
+
+  final List<MateriaModel> materias;
+
+  @override
+  Future<List<MateriaModel>> getMaterias() async => materias;
+
   @override
   Future<UsuarioModel> getUsuarioProgresso(int id) async {
     return const UsuarioModel(
@@ -44,6 +52,29 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('MISSÃO DO DIA'), findsOneWidget);
+    expect(find.text('ESCOLHA UMA MATÉRIA'), findsOneWidget);
+    expect(find.text('Nenhuma matéria disponível ainda.'), findsOneWidget);
+  });
+
+  testWidgets('lista as matérias vindas da API', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: HomeScreen(
+          apiService: _FakeApiService(
+            materias: const [
+              MateriaModel(nome: 'Redes', totalQuestoes: 12),
+              MateriaModel(nome: 'Banco de Dados', totalQuestoes: 1),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(find.text('REDES'), findsOneWidget);
+    expect(find.text('12 questões'), findsOneWidget);
+    expect(find.text('BANCO DE DADOS'), findsOneWidget);
+    expect(find.text('1 questão'), findsOneWidget);
   });
 }
